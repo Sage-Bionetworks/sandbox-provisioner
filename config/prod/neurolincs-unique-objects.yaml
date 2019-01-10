@@ -1,5 +1,5 @@
 # Provision an EC2 instance
-template_path: templates/managed-ec2-v2.yaml
+template_path: templates/managed-ec2-v3.yaml
 stack_name: neurolincs-unique-objects-ec2
 parameters:
   # The Sage deparment for this resource
@@ -14,6 +14,7 @@ parameters:
   JcConnectKey: !ssm /infra/JcConnectKey
   JcServiceApiKey: !ssm /infra/JcServiceApiKey
   JcSystemsGroupId: !ssm /infra/JcSystemsGroupId
+  VolumeSize: 750
 hooks:
   after_create:
     - !notify_ec2
