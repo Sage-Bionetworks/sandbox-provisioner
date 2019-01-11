@@ -10,11 +10,11 @@ parameters:
   OwnerEmail: "kenneth.daily@sagebase.org"
   # EC2 instance type (available types https://aws.amazon.com/ec2/instance-types/)
   InstanceType: "c5.2xlarge"
-   # Integration with our jumpcloud directory service (do not change)
+  VolumeSize: 750
+  # Integration with our jumpcloud directory service (do not change)
   JcConnectKey: !ssm /infra/JcConnectKey
   JcServiceApiKey: !ssm /infra/JcServiceApiKey
   JcSystemsGroupId: !ssm /infra/JcSystemsGroupId
-  VolumeSize: 750
 hooks:
   after_create:
     - !notify_ec2
