@@ -3,3 +3,6 @@
 # For creation and termination of requests which are added to config/prod
 # add other individuals who have been trained on the process here.
 config/prod/* @zaro0508 @xschildw @kdaily @thomasyu888
+
+# For creation and removal of templates
+templates/* @zaro0508 @xschildw @kdaily @thomasyu888
