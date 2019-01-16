@@ -5,4 +5,4 @@
 config/* @Sage-Bionetworks/sagebio-it @Sage-Bionetworks/infra-oversight-committee
 
 # For creation and removal of templates
-templates/ @Sage-Bionetworks/sagebio-it @Sage-Bionetworks/infra-oversight-committee
+templates/* @Sage-Bionetworks/sagebio-it @Sage-Bionetworks/infra-oversight-committee
