@@ -5,4 +5,4 @@
 config/prod/* @zaro0508 @xschildw @kdaily @thomasyu888
 
 # For creation and removal of templates
-templates/* @zaro0508 @xschildw @kdaily @thomasyu888
+templates/ @Sage-Bionetworks/sagebio-it @Sage-Bionetworks/infra-oversight-committee
