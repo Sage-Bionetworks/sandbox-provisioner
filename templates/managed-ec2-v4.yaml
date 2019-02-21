@@ -1,7 +1,3 @@
-#######################################################
-# THIS TEMPLATE IS DEPRECATED
-# PLEASE USE managed-ec2-v3.yaml
-#######################################################
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
   Provision EC2 instance, connect to Jumpcloud, and associate with a jumpcloud systems group.
@@ -65,6 +61,12 @@ Parameters:
       - c4.2xlarge
       - c4.4xlarge
       - c4.8xlarge
+      - c5.large
+      - c5.xlarge
+      - c5.2xlarge
+      - c5.4xlarge
+      - c5.9xlarge
+      - c5.18xlarge
       - g2.2xlarge
       - g2.8xlarge
       - r3.large
@@ -122,10 +124,20 @@ Parameters:
   OwnerEmail:
     Description: The owner's email address for this resource (i.e. jsmith@sagebase.org)
     Type: String
+  ParkMyCloudManaged:
+    Description: Allow ParkMyCloud service to start/stop resources
+    Type: String
+    Default: 'yes'
   AMIId:
     Description: ID of the AMI to deploy
     Type: String
     Default: ""
+  VolumeSize:
+    Description: The EC2 volume size (in GB)
+    Type: Number
+    Default: 8
+    MinValue: 8
+    MaxValue: 1000
 Conditions:
   PublicEc2Resources: !Or [!Equals [ !Ref VpcSubnet, PublicSubnet ], !Equals [ !Ref VpcSubnet, PublicSubnet1 ], !Equals [ !Ref VpcSubnet, PublicSubnet2 ] ]
   HasAMIId: !Not [!Equals ["", !Ref AMIId]]
@@ -228,6 +240,18 @@ Mappings:
     c4.4xlarge:
       Arch: HVM64
     c4.8xlarge:
+      Arch: HVM64
+    c5.large:
+      Arch: HVM64
+    c5.xlarge:
+      Arch: HVM64
+    c5.2xlarge:
+      Arch: HVM64
+    c5.4xlarge:
+      Arch: HVM64
+    c5.9xlarge:
+      Arch: HVM64
+    c5.18xlarge:
       Arch: HVM64
     g2.2xlarge:
       Arch: HVMG2
@@ -379,6 +403,12 @@ Resources:
       ImageId: !If [HasAMIId, !Ref AMIId, !FindInMap [AWSRegionArch2AMI, !Ref 'AWS::Region', !FindInMap [AWSInstanceType2Arch, !Ref InstanceType, Arch]]]
       InstanceType: !Ref InstanceType
       KeyName: !Ref KeyName
+      BlockDeviceMappings:
+        -
+          DeviceName: "/dev/xvda"
+          Ebs:
+            DeleteOnTermination: true
+            VolumeSize: !Ref VolumeSize
       NetworkInterfaces:
         - DeleteOnTermination: true
           DeviceIndex: "0"
@@ -417,6 +447,8 @@ Resources:
             - !Ref 'AWS::Region'
             - |+
       Tags:
+        - Key: "parkmycloud"
+          Value: !Ref ParkMyCloudManaged
         - Key: "Name"
           Value: !Ref 'AWS::StackName'
         - Key: "Department"
