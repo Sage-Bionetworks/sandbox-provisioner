@@ -11,11 +11,11 @@ parameters:
   # (Optional) EC2 instance type, default is "t2.nano" (other available types https://aws.amazon.com/ec2/instance-types/)
   InstanceType: "t2.2xlarge"
   # (Optional) ID of the base AMI (supported distros: AWS linux)
-  AMIId: "ami-0d051218cbaf3405a"      # AMI with my R packages
+  AMIId:       # AMI with my R packages
   # (Optional) EC2 boot volume size in GB, default is 8GB, Max is 1000GB
   VolumeSize: "100"
   # (Optional) Run EC2 in a subnet (valid values: 'PrivateSubnet' or 'PublicSubnet')
-  VpcSubnet: "PublicSubnet"
+  VpcSubnet: "PrivateSubetn"
   # (Optional) Expose a port to incoming traffic (valid range: 1-65535)
   OpenPort: "80"
 
