@@ -10,11 +10,6 @@ parameters:
   OwnerEmail: "sara.gosline@sagebase.org"
   # (Optional) EC2 instance type, default is "t2.nano" (other available types https://aws.amazon.com/ec2/instance-types/)
   InstanceType: "t2.2xlarge"
-  # (Optional) ID of the base AMI (supported distros: AWS linux)
-  # (Optional) Expose a port to incoming traffic (valid range: 1-65535)
-  OpenPort: "80"
-
-  # Integration with our jumpcloud directory service (do not change)
   JcConnectKey: !ssm /infra/JcConnectKey
   JcServiceApiKey: !ssm /infra/JcServiceApiKey
   JcSystemsGroupId: !ssm /infra/JcSystemsGroupId
