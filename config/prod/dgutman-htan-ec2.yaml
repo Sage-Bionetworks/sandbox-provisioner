@@ -10,7 +10,7 @@ parameters:
   OwnerEmail: "xengie.doan@sagebase.org"
   # Default account settings, leave alone unless you plan to override
   VpcName: {{stack_group_config.default_vpc}}
-  KeyName: EmoryHTAN-dgutman ### have to override
+  KeyName: "EmoryHealthcare-dgutman" ### have to override
   # KeyName: {{stack_group_config.default_key_pair}}
   # AMIId: {{stack_group_config.default_ami}}
   # The following parameters are only examples they are not required.
