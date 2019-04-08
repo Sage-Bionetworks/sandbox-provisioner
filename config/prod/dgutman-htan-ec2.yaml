@@ -12,7 +12,7 @@ parameters:
   VpcName: {{stack_group_config.default_vpc}}
   KeyName: "EmoryHealthcare-dgutman" ### have to override
   # KeyName: {{stack_group_config.default_key_pair}}
-  # AMIId: {{stack_group_config.default_ami}}
+  AMIId: {{stack_group_config.default_ami}}
   # The following parameters are only examples they are not required.
   # You may omit them if you do not need to override the defaults.
 
