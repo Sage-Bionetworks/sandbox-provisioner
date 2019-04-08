@@ -1,5 +1,5 @@
 # Provision an EC2 instance
-template_path: managed-ec2-v7.yaml
+template_path: "remote/managed-ec2.yaml"
 stack_name: dgutman-htan-ec2
 parameters:
   # The Sage deparment (Platform, CompOnc, SysBio, Governance, etc..)
