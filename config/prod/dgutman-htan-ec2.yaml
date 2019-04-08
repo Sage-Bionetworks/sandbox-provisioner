@@ -12,14 +12,14 @@ parameters:
   VpcName: {{stack_group_config.default_vpc}}
   KeyName: "EmoryHealthcare-dgutman" ### have to override
   # KeyName: {{stack_group_config.default_key_pair}}
-  # AMIId: {{stack_group_config.default_ami}}
+  AMIId: {{stack_group_config.default_ami}}
   # The following parameters are only examples they are not required.
   # You may omit them if you do not need to override the defaults.
 
   # (Optional) EC2 instance type, default is "t2.nano" (other available types https://aws.amazon.com/ec2/instance-types/)
   InstanceType: "m5d.xlarge"
-  # (Optional) ID of the base AMI (default: ami-97785bed) (supported distros: AWS linux)
-  AMIId: "ami-0080e4c5bc078760e"      # Amazon Linux 2 AMI (HVM), SSD Volume Type
+  # (Optional) ID of the base AMI (default: ami-0080e4c5bc078760e) (supported distros: AWS linux)
+  # AMIId: "ami-0080e4c5bc078760e"      # Amazon Linux 2 AMI (HVM), SSD Volume Type
   # (Optional) EC2 boot volume size in GB, default is 8GB, Max is 1000GB
   VolumeSize: "150"
   # (Optional) Run EC2 in a subnet (default: PrivateSubnet) (valid values: PrivateSubnet or PublicSubnet)
