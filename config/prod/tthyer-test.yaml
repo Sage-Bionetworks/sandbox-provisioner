@@ -32,7 +32,7 @@ parameters:
   # (Optional) Number of daily backups to keep (default: 7) (valid range: 1-180)
   # SnapshotCount: "14"
   # VolumeSize: "500"
-  
+
   # Integration with our jumpcloud directory service (do not change)
   JcConnectKey: !ssm /infra/JcConnectKey
   JcServiceApiKey: !ssm /infra/JcServiceApiKey
