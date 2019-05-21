@@ -1,13 +1,13 @@
-# Instance to test integration with parkmycloud
+# Provision an EC2 instance
 template_path: remote/managed-ec2.yaml
-stack_name: pmc-test-ec2
+stack_name: jb-new-instance-1
 parameters:
-  # The Sage deparment for this resource
-  Department: "Platform"
-  # The Sage project this resource will be used for
-  Project: "Infrastructure"
+  # The Sage deparment (Platform, CompOnc, SysBio, Governance, etc..)
+  Department: "CompOnc"
+  # The Sage project (Infrastructure, amp-ad, ntap, dream, etc..)
+  Project: "NF"
   # The resource owner
-  OwnerEmail: "khai.do@sagebase.org"
+  OwnerEmail: "jineta.banerjee@sagebase.org"
 
   # Default account settings, leave alone unless you plan to override
   VpcName: "{{stack_group_config.default_vpc}}"
