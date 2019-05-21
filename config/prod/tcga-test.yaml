@@ -13,10 +13,8 @@ parameters:
   VpcName: "{{stack_group_config.default_vpc}}"
   KeyName: "{{stack_group_config.default_key_pair}}"
   AMIId: "{{stack_group_config.default_ubuntu_ami}}"
-
   # Settings have default values but can be overriden. Set the below
   # parameters *only* if you want to override the defaults.
-
   # (Optional) EC2 instance type, default is "t3.nano" (other available types https://aws.amazon.com/ec2/instance-types/)
   InstanceType: "c5.9xlarge"
   # (Optional) EC2 boot volume size in GB, default is 8GB, Max is 1000GB
