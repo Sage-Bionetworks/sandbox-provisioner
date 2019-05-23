@@ -8,7 +8,7 @@ Department: "CompOnc"
 Project: "NF-Hackathon-harmonized-files"
 # The resource owner
 OwnerEmail: "jineta.banerjee@sagebase.org"
-	
+
 # Default account settings, leave alone unless you plan to override
 # VpcName: "{{stack_group_config.default_vpc}}"
 # KeyName: "{{stack_group_config.default_key_pair}}"
@@ -31,7 +31,7 @@ AMIId: "ami-061a59e27c8da0b93"
 # BackupEc2: "true"
 # (Optional) Number of daily backups to keep (default: 7) (valid range: 1-180)
 # SnapshotCount: "14"
-	
+
 # Integration with our jumpcloud directory service (do not change)
 JcConnectKey: !ssm /infra/JcConnectKey
 JcServiceApiKey: !ssm /infra/JcServiceApiKey
