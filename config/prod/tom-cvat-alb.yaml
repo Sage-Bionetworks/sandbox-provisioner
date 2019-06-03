@@ -11,7 +11,7 @@ parameters:
 
    # load balancer configs
   Ec2InstanceId: "i-04c318988a159582a"
-  SSLCertificateIdArn: "arn:aws:acm:us-east-1:055273631518:certificate/992c2d49-579a-465e-beff-1a08c284f7db"
+  SSLCertificateIdArn: "arn:aws:acm:us-east-1:563295687221:certificate/b7f3a44b-1c72-4f84-8e8a-42050764e6c2"
   VpcId: "vpc-0e9b80dc470a797d5"   # computevpc
   AppPort: "80"         # rstudio port
   Subnets: "subnet-21a68d7c,subnet-4f3e2b2b,subnet-77d1e458"  # public subnets
