@@ -1,6 +1,5 @@
 # Provision an EC2 instance
-template_path: remote/managed-ec2-ubuntu-v1.yaml
-stack_name: nf-vcf-workflow
+template_path: remote/managed-ec2-v6.yaml
 parameters:
   # The Sage deparment (Platform, CompOnc, SysBio, Governance, etc..)
   Department: "CompOnc"
