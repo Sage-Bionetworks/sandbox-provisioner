@@ -17,7 +17,7 @@ parameters:
   VpcName: "sandcastlevpc"
   KeyName: "sandbox"
   AMIId: "ami-0a313d6098716f372"      # Ubuntu, 18.04 LTS, amd64 bionic image build on 2019-02-12
-  
+
   # Settings have default values but can be overriden. Set the below
   # parameters *only* if you want to override the defaults.
 
