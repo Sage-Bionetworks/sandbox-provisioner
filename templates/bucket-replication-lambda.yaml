@@ -20,9 +20,6 @@ Parameters:
   FunctionCodeBucket:
     Type: String
     Description: S3 bucket where lambda deployment package is stored
-  FunctionCodePrefix:
-    Type: String
-    Description: Prefix, not including filename, of the directory in S3 where code is stored
   FunctionCodeKey:
     Type: String
     Description: S3 key of lambda deployment package file
@@ -157,7 +154,7 @@ Resources:
     Properties:
       Bucket: !Ref DataBucket
       PolicyDocument:
-        Version: '2008-10-17'
+        Version: '2012-10-17'
         Id: PolicyForDestinationBucket
         Statement:
           # Allow Synapse to access the data bucket
@@ -180,7 +177,7 @@ Resources:
             Resource: !Join [ "", [!GetAtt [DataBucket, Arn], "/*"]]
             Effect: "Allow"
           # Allow the source bucket to write to the data bucket
-          - Sid: !Sub SourceAccount1
+          - Sid: SourceAccount1
             Effect: Allow
             Principal:
               AWS: !Sub arn:aws:iam::${ReplicationSourceAccountId}:root
