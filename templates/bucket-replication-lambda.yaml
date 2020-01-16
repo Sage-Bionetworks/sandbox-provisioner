@@ -1,0 +1,203 @@
+# This template creates an S3 bucket and a Lambda function
+#
+# The S3 bucket is granted permissions to be a Synapse storage location, *and* an S3 replication destination
+# from a collaborator's AWS account.
+#
+# The Lambda function is triggered by PUT requests to the bucket. It reads the files, computes and writes md5 sums
+# back to the bucket, and adds file handles to Synapse.
+#
+# This stack will need to be created with SynapseStorageLocationId = "" (blank). After the bucket is created,
+# the Synapse storage location must be created externally. Then update the stack with the new value for
+# SynapseStorageLocationId.
+#
+
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  FunctionName:
+    Type: String
+    Description: Name of lambda function
+  FunctionCodeBucket:
+    Type: String
+    Description: S3 bucket where lambda deployment package is stored
+  FunctionCodePrefix:
+    Type: String
+    Description: Prefix, not including filename, of the directory in S3 where code is stored
+  FunctionCodeKey:
+    Type: String
+    Description: S3 key of lambda deployment package file
+  SynapseUsername:
+    Type: String
+    Description: Synapse username used to create files in Synapse.
+  SynapseApikey:
+    Type: String
+    Description: Synapse API key (associated with SynapseUsername) used to authenticate to Synapse.
+  SynapseStorageLocationId:
+    Type: Number
+    Description: >
+      Integer location ID for the bucket containing the files to be added to Synapse. Note a blank value should
+      be provided the when the stack is created.
+      See https://docs.synapse.org/articles/custom_storage_location.html
+  SynapseNotifyUsers:
+    Type: String
+    Description: >
+      Comma-delimited list of numeric Synapse user IDs to be notified when an attempt to sync to Synapse is made
+      by the Lambda function. Example: the `ownerId` returned by a call to the Synapse REST API /userProfile.
+  ReplicationSourceAccountId:
+    Type: Number
+    Description: ID of the AWS account holding the replication source bucket.
+  SynapseAWSAccountId:
+    Type: Number
+    Description: >
+      ID of the Synapse AWS account. Used for allowing Synapse to access the DataBucket as an external storage location.
+      See https://docs.synapse.org/articles/custom_storage_location.html
+    Default: 325565585839
+  Md5BlockSize:
+    Type: Number
+    Default: 5242880 # 5 MB
+    Description:
+      Maximum block size allocated to computing MD5 sums, in bytes.
+
+Resources:
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      #Description: ARN of role that lambda uses for execution.
+      RoleName: !Sub ${AWS::StackName}-LambdaExecutionRole
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: ['sts:AssumeRole']
+            Effect: Allow
+            Principal:
+              Service: [lambda.amazonaws.com]
+
+  LambdaExecutionRolePolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      #Description: Allows access to the S3 data bucket and CloudWatch logs.
+      PolicyName: !Sub ${AWS::StackName}-LambdaExecutionPolicy
+      Roles: [!Ref 'LambdaExecutionRole']
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - s3:ListBucket
+            Resource:
+              - !Join
+                - ""
+                - - "arn:aws:s3:::"
+                  - !Sub ${AWS::StackName}-data
+            Sid: VisualEditor1
+          - Effect: Allow
+            Action:
+              - s3:PutObject
+              - s3:GetObject
+            Resource:
+              - !Join
+                - ""
+                - - "arn:aws:s3:::"
+                  - !Sub ${AWS::StackName}-data
+                  - "/*"
+
+  BucketToSynapseFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref FunctionName
+      Code:
+        S3Bucket: !Ref FunctionCodeBucket
+        S3Key: !Ref FunctionCodeKey
+      Description: Adds files from an S3 bucket to Synapse.
+      Environment:
+        Variables:
+          SYNAPSE_USERNAME: !Ref SynapseUsername
+          SYNAPSE_APIKEY: !Ref SynapseApikey
+          SYNAPSE_SOURCE_BUCKET_STORAGE_LOCATION_ID: !Ref SynapseStorageLocationId
+          SYNAPSE_NOTIFY_USERS: !Ref SynapseNotifyUsers
+          MD5_BLOCK_SIZE: !Ref Md5BlockSize
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.7
+      Timeout: 300
+      Role: !GetAtt LambdaExecutionRole.Arn
+
+  DataBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    DependsOn:
+      - LambdaExecutionRolePolicy
+    Properties:
+      BucketName: !Sub ${AWS::StackName}-data
+      VersioningConfiguration:
+        Status: Enabled
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: s3:ObjectCreated:*
+            Function: !GetAtt [BucketToSynapseFunction, Arn]
+
+  BucketPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !Ref BucketToSynapseFunction
+      Principal: s3.amazonaws.com
+      SourceAccount: !Ref 'AWS::AccountId'
+      SourceArn: !Join
+          - ""
+          - - "arn:aws:s3:::"
+            - !Sub ${AWS::StackName}-data
+
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref DataBucket
+      PolicyDocument:
+        Version: '2008-10-17'
+        Id: PolicyForDestinationBucket
+        Statement:
+          # Allow Synapse to access the data bucket
+          - Sid: Synapse1
+            Principal:
+              AWS: !Sub "arn:aws:iam::${SynapseAWSAccountId}:root"
+            Action:
+              - "s3:ListBucket*"
+              - "s3:GetBucketLocation"
+            Resource: !GetAtt
+              - DataBucket
+              - Arn
+            Effect: 'Allow'
+          - Sid: Synapse2
+            Principal:
+              AWS: !Sub "arn:aws:iam::${SynapseAWSAccountId}:root"
+            Action:
+              - "s3:GetObject*"
+              - "s3:*MultipartUpload*"
+            Resource: !Join [ "", [!GetAtt [DataBucket, Arn], "/*"]]
+            Effect: "Allow"
+          # Allow the source bucket to write to the data bucket
+          - Sid: !Sub SourceAccount1
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${ReplicationSourceAccountId}:root
+            Action:
+              - s3:GetBucketVersioning
+              - s3:ReplicateObject
+              - s3:ReplicateDelete
+              - s3:ObjectOwnerOverrideToBucketOwner
+            Resource:
+              - !GetAtt [DataBucket, Arn]
+              - !Join [ "", [!GetAtt [DataBucket, Arn], "/*"]]
+
+
+Outputs:
+  BucketToSynapseFunctionArn:
+    Description: ARN of the lambda function that was created in this template.
+    Value: !GetAtt BucketToSynapseFunction.Arn
+  DataBucketArn:
+    Description: ARN of the data bucket that was created
+    Value: !GetAtt DataBucket.Arn
