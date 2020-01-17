@@ -177,8 +177,12 @@ Resources:
 
 Outputs:
   BucketToSynapseFunctionArn:
+    Export:
+      Name: !Sub "${AWS::Region}-${AWS::StackName}-BucketToSynapseFunctionArn"
     Description: ARN of the lambda function that was created in this template.
     Value: !GetAtt BucketToSynapseFunction.Arn
   DataBucketArn:
+    Export:
+      Name: !Sub "${AWS::Region}-${AWS::StackName}-DataBucketArn"
     Description: ARN of the data bucket that was created
     Value: !GetAtt DataBucket.Arn
