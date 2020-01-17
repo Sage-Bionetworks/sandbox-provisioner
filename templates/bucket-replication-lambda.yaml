@@ -69,6 +69,7 @@ Resources:
     Type: AWS::IAM::Policy
     Properties:
       #Description: Allows access to the S3 data bucket and CloudWatch logs.
+      PolicyName: !Sub ${AWS::StackName}-LambdaExecutionPolicy
       Roles: [!Ref 'LambdaExecutionRole']
       PolicyDocument:
         Statement:
