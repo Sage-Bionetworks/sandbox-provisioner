@@ -1,15 +1,35 @@
-# This template creates an S3 bucket and a Lambda function
+# This template creates an S3 bucket and a Lambda function to automate file upload to Synapse.
 #
 # The S3 bucket is granted permissions to be a Synapse storage location, *and* an S3 replication destination
 # from a collaborator's AWS account.
 #
+# Lambda Code is here: https://github.com/ecmonsen/Synapse-replication-uploader
+#
 # The Lambda function is triggered by PUT requests to the bucket. It reads the files, computes and writes md5 sums
 # back to the bucket, and adds file handles to Synapse.
 #
-# This stack will need to be created with SynapseStorageLocationId = "" (blank). After the bucket is created,
-# the Synapse storage location must be created externally. Then update the stack with the new value for
-# SynapseStorageLocationId.
+# BEFORE STACK CREATION:
 #
+# 1. Use AWS SAM to package the Lambda code and upload it to an S3 bucket. The S3 bucket must be readable by the
+# identity creating the CloudFormation stack. Provide the S3 bucket and key as parameters FunctionCodeBucket and
+# FunctionCodeKey to CloudFormation.
+#
+# ADDITIONAL ACTIONS REQUIRED AFTER STACK CREATION:
+#
+# 1. After the stack creates the S3 bucket, you will need to use Synapse API or CLI to create an external
+# Synapse storage location must pointing to the bucket. Then update the stack with the new value for
+# SynapseStorageLocationId. Use code or web as specified here:
+# https://docs.synapse.org/articles/custom_storage_location.html#set-s3-bucket-as-upload-location
+#
+# Here's a handy command line for getting the bucket name:
+# `aws cloudformation describe-stacks --stack-name "${STACKNAME}" --query "Stacks[0].Outputs[?OutputKey=='DataBucketName'].OutputValue" --output text`
+#
+# 2. Update the Secrets Manager secret value with the contents of a Synapse config file. The config file
+# should have the credentials of the Synapse on whose behalf the Lambda will do uploads. This can be done using
+# the AWS console or the CLI with these commands (you will need to be admin or assume an admin role to encrypt secrets):
+#
+# `SECRET_NAME=$(aws cloudformation describe-stacks --stack-name "${STACKNAME}" --query "Stacks[0].Outputs[?OutputKey=='CredentialsSecretName'].OutputValue" --output text)`
+# `aws secretsmanager put-secret-value --secret-id "$SECRET_NAME" --secret-binary fileb://path/to/.synapseConfig`
 
 AWSTemplateFormatVersion: "2010-09-09"
 
@@ -20,18 +40,22 @@ Parameters:
   FunctionCodeKey:
     Type: String
     Description: S3 key of lambda deployment package file
-  SynapseUsername:
+  SynapseConfig:
     Type: String
-    Description: Synapse username used to create files in Synapse.
-  SynapseApikey:
-    Type: String
-    Description: Synapse API key (associated with SynapseUsername) used to authenticate to Synapse.
+    Description: >
+      Contents of a .synapseConfig file containing Synapse username and API key.
+      Minimum contents required are these three lines:
+      [authentication]
+      username = <user name>
+      apikey = <api key>
+    Default: "To Do: Replace with a valid .synapseConfig with credentials"
   SynapseStorageLocationId:
     Type: Number
     Description: >
       Integer location ID for the bucket containing the files to be added to Synapse. Note a blank value should
       be provided the when the stack is created.
       See https://docs.synapse.org/articles/custom_storage_location.html
+    Default: -1
   SynapseNotifyUsers:
     Type: String
     Description: >
@@ -52,7 +76,72 @@ Parameters:
     Description:
       Maximum block size allocated to computing MD5 sums, in bytes.
 
+Mappings:
+  AdminRoleArns:
+    "563295687221":
+      Arn: "arn:aws:iam::563295687221:role/accounts-AWSIAMAdminRole-1B5HUQPC19H69"
+    "055273631518":
+      Arn: "arn:aws:iam::055273631518:role/accounts-AWSIAMAdminRole-JL0BF315YDU0"
+    "398582528253":
+      # Note: Groups not allowed. Create a role that root can assume
+      Arn: "arn:aws:iam::398582528253:role/AdminRole"
+
 Resources:
+  KmsKey:
+    Type: "AWS::KMS::Key"
+    Properties:
+      Description: !Sub "${AWS::StackName}Key"
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: "Allow administration of the key"
+            Effect: "Allow"
+            Principal:
+              AWS:
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action:
+              - "kms:Create*"
+              - "kms:Describe*"
+              - "kms:Enable*"
+              - "kms:List*"
+              - "kms:Put*"
+              - "kms:Update*"
+              - "kms:Revoke*"
+              - "kms:Disable*"
+              - "kms:Get*"
+              - "kms:Delete*"
+              - "kms:ScheduleKeyDeletion"
+              - "kms:CancelKeyDeletion"
+            Resource: "*"
+          # TEMP: for testing the key
+          - Sid: "Allow use of the key"
+            Effect: "Allow"
+            Principal:
+              AWS:
+                - !FindInMap [AdminRoleArns, !Ref "AWS::AccountId", Arn]
+                - !GetAtt LambdaExecutionRole.Arn
+            Action:
+              - "kms:Encrypt"
+              - "kms:Decrypt"
+              - "kms:DescribeKey"
+              - "kms:Generate*"
+              - "kms:*"
+            Resource: "*"
+            # TODO: Allow lambda to decrypt only; allow other user(s) to encrypt
+            # TODO tags on everything
+#      Tags:
+#        - Key: "Department"
+#          Value: !Ref Department
+#        - Key: "Project"
+#          Value: !Ref Project
+#        - Key: "OwnerEmail"
+#          Value: !Ref OwnerEmail
+
+  KmsKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub "alias/${AWS::StackName}/Key"
+      TargetKeyId: !Ref KmsKey
 
   LambdaExecutionRole:
     Type: AWS::IAM::Role
@@ -91,6 +180,21 @@ Resources:
               - s3:GetObject
             Resource:
               - !Sub "arn:aws:s3:::${AWS::StackName}-data/*"
+          - Action: ['kms:*']
+            Effect: Allow
+            Resource: !GetAtt KmsKey.Arn
+          - Action: ['secretsmanager:GetSecretValue']
+            Effect: Allow
+            Resource: !Ref SynapseCredentialsSecret
+
+  SynapseCredentialsSecret:
+    Type: 'AWS::SecretsManager::Secret'
+    Properties:
+      Description: API key used to access Synapse
+      SecretString: !Ref SynapseConfig
+      KmsKeyId: !Ref KmsKey
+      # Need explicit name so that it can be referenced by the Lambda function
+      Name: !Sub "${AWS::Region}-${AWS::StackName}-SynapseCredentialsSecret"
 
   BucketToSynapseFunction:
     Type: AWS::Lambda::Function
@@ -101,11 +205,11 @@ Resources:
       Description: Adds files from an S3 bucket to Synapse.
       Environment:
         Variables:
-          SYNAPSE_USERNAME: !Ref SynapseUsername
-          SYNAPSE_APIKEY: !Ref SynapseApikey
+          CREDENTIALS_SECRET_NAME: !Sub "${AWS::Region}-${AWS::StackName}-SynapseCredentialsSecret"
           SYNAPSE_SOURCE_BUCKET_STORAGE_LOCATION_ID: !Ref SynapseStorageLocationId
           SYNAPSE_NOTIFY_USERS: !Ref SynapseNotifyUsers
           MD5_BLOCK_SIZE: !Ref Md5BlockSize
+          KMS_KEY_ARN: !Ref KmsKey
       Handler: lambda_function.lambda_handler
       Runtime: python3.7
       Timeout: 300
@@ -113,7 +217,8 @@ Resources:
 
   DataBucket:
     Type: AWS::S3::Bucket
-    DeletionPolicy: Delete
+    # Data needs to live on even if the other infrastructure is removed
+    DeletionPolicy: Retain
     DependsOn:
       - LambdaExecutionRolePolicy
     Properties:
@@ -168,6 +273,7 @@ Resources:
               AWS: !Sub arn:aws:iam::${ReplicationSourceAccountId}:root
             Action:
               - s3:GetBucketVersioning
+              - s3:PutBucketVersioning
               - s3:ReplicateObject
               - s3:ReplicateDelete
               - s3:ObjectOwnerOverrideToBucketOwner
@@ -187,3 +293,33 @@ Outputs:
       Name: !Sub "${AWS::Region}-${AWS::StackName}-DataBucketArn"
     Description: ARN of the data bucket that was created
     Value: !GetAtt DataBucket.Arn
+  DataBucketName:
+    Export:
+      Name: !Sub "${AWS::Region}-${AWS::StackName}-DataBucketName"
+    Description: ARN of the data bucket that was created
+    Value: !Ref DataBucket
+  KmsKeyArn:
+    Export:
+      Name: !Sub "${AWS::Region}-${AWS::StackName}-KmsKeyArn"
+    Description: ARN of the KMS key
+    Value: !GetAtt KmsKey.Arn
+  KmsKeyAliasName:
+    Export:
+      Name: !Sub "${AWS::Region}-${AWS::StackName}-KmsKeyAliasArn"
+    Description: ARN of the KMS key alias
+    Value: !Ref KmsKeyAlias
+  KmsKeyUsageRole:
+    Export:
+      Name: !Sub "${AWS::Region}-${AWS::StackName}-KmsKeyUsageRole"
+    Description: Role that was granted usage access to the KMS key
+    Value: !FindInMap [AdminRoleArns, !Ref "AWS::AccountId", Arn]
+  LambdaExecutionRoleArn:
+    Export:
+      Name: !Sub "${AWS::Region}-${AWS::StackName}-LambdaExecutionRoleArn"
+    Description: ARN of the lambda execution role
+    Value: !GetAtt LambdaExecutionRole.Arn
+  CredentialsSecretName:
+    Export:
+      Name: !Sub "${AWS::Region}-${AWS::StackName}-CredentialsSecretName"
+    Description: Name of the Secrets Manager secret for encrypted Synapse credentials
+    Value: !Ref SynapseCredentialsSecret
