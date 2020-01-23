@@ -75,6 +75,21 @@ Parameters:
     Default: 5242880 # 5 MB
     Description:
       Maximum block size allocated to computing MD5 sums, in bytes.
+  Department:
+    Description: 'The department for this resource'
+    Type: String
+    AllowedPattern: '^\S*$'
+    ConstraintDescription: 'Must be string with no spaces'
+  Project:
+    Description: 'The name of the project that this resource is used for'
+    Type: String
+    AllowedPattern: '^\S*$'
+    ConstraintDescription: 'Must be string with no spaces'
+  OwnerEmail:
+    Description: 'Email address of the owner of this resource'
+    Type: String
+    AllowedPattern: '^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'
+    ConstraintDescription: 'Must be an acceptable email address syntax(i.e. joe.smith@sagebase.org)'
 
 Mappings:
   AdminRoleArns:
@@ -129,13 +144,13 @@ Resources:
             Resource: "*"
             # TODO: Allow lambda to decrypt only; allow other user(s) to encrypt
             # TODO tags on everything
-#      Tags:
-#        - Key: "Department"
-#          Value: !Ref Department
-#        - Key: "Project"
-#          Value: !Ref Project
-#        - Key: "OwnerEmail"
-#          Value: !Ref OwnerEmail
+      Tags:
+        - Key: Department
+          Value: !Ref Department
+        - Key: Project
+          Value: !Ref Project
+        - Key: OwnerEmail
+          Value: !Ref OwnerEmail
 
   KmsKeyAlias:
     Type: AWS::KMS::Alias
@@ -153,6 +168,13 @@ Resources:
             Effect: Allow
             Principal:
               Service: [lambda.amazonaws.com]
+      Tags:
+        - Key: Department
+          Value: !Ref Department
+        - Key: Project
+          Value: !Ref Project
+        - Key: OwnerEmail
+          Value: !Ref OwnerEmail
 
   LambdaExecutionRolePolicy:
     Type: AWS::IAM::Policy
@@ -195,6 +217,13 @@ Resources:
       KmsKeyId: !Ref KmsKey
       # Need explicit name so that it can be referenced by the Lambda function
       Name: !Sub "${AWS::Region}-${AWS::StackName}-SynapseCredentialsSecret"
+      Tags:
+        - Key: Department
+          Value: !Ref Department
+        - Key: Project
+          Value: !Ref Project
+        - Key: OwnerEmail
+          Value: !Ref OwnerEmail
 
   BucketToSynapseFunction:
     Type: AWS::Lambda::Function
@@ -214,6 +243,13 @@ Resources:
       Runtime: python3.7
       Timeout: 300
       Role: !GetAtt LambdaExecutionRole.Arn
+      Tags:
+        - Key: Department
+          Value: !Ref Department
+        - Key: Project
+          Value: !Ref Project
+        - Key: OwnerEmail
+          Value: !Ref OwnerEmail
 
   DataBucket:
     Type: AWS::S3::Bucket
@@ -229,6 +265,13 @@ Resources:
         LambdaConfigurations:
           - Event: s3:ObjectCreated:*
             Function: !GetAtt [BucketToSynapseFunction, Arn]
+      Tags:
+        - Key: Department
+          Value: !Ref Department
+        - Key: Project
+          Value: !Ref Project
+        - Key: OwnerEmail
+          Value: !Ref OwnerEmail
 
   BucketPermission:
     Type: AWS::Lambda::Permission
@@ -280,7 +323,6 @@ Resources:
             Resource:
               - !GetAtt [DataBucket, Arn]
               - !Join [ "", [!GetAtt [DataBucket, Arn], "/*"]]
-
 
 Outputs:
   BucketToSynapseFunctionArn:
