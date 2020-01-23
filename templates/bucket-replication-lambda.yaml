@@ -61,7 +61,7 @@ Parameters:
     Description: >
       Comma-delimited list of numeric Synapse user IDs to be notified when an attempt to sync to Synapse is made
       by the Lambda function. Example: the `ownerId` returned by a call to the Synapse REST API /userProfile.
-  ReplicationSourceAccountId:
+  SourceAccountId:
     Type: Number
     Description: ID of the AWS account holding the replication source bucket.
   SynapseAWSAccountId:
@@ -313,7 +313,7 @@ Resources:
           - Sid: SourceAccount1
             Effect: Allow
             Principal:
-              AWS: !Sub arn:aws:iam::${ReplicationSourceAccountId}:root
+              AWS: !Sub arn:aws:iam::${SourceAccountId}:root
             Action:
               - s3:GetBucketVersioning
               - s3:PutBucketVersioning
