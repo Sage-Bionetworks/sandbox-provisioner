@@ -17,7 +17,7 @@ parameters:
   VpcName: "sandcastlevpc"
   KeyName: "sandbox"
   # AMIId: "ami-0810a318c4b1243c5"      # https://github.com/Sage-Bionetworks-IT/packer-base-amazonlinux2/releases/tag/v1.0.2
-  AMIId: "ami-0cd489a193a7cc7de"    # https://github.com/Sage-Bionetworks-IT/packer-rstudio/releases/tag/v1.0.2
+  AMIId: "ami-01866cea595e4f968"    # https://github.com/Sage-Bionetworks-IT/packer-rstudio/releases/tag/v1.0.3
 
   # Settings have default values but can be overriden. Set the below
   # parameters *only* if you want to override the defaults.
