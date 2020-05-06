@@ -11,7 +11,7 @@ parameters:
   # The Sage project (Infrastructure, amp-ad, ntap, dream, etc..)
   Project: "Infrastructure"
   # The resource owner
-  OwnerEmail: "joe.smith@sagebase.org"
+  OwnerEmail: "thomas.yu@sagebase.org"
 
   # Default account settings, leave alone unless you plan to override
   VpcName: "sandcastlevpc"
