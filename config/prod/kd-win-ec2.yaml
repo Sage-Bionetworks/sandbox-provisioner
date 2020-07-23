@@ -12,7 +12,7 @@ parameters:
   # Default account settings, leave alone unless you plan to override
   VpcName: "sandcastlevpc"
   KeyName: "sandbox"
-  AMIId: "ami-02d43577e47e684d9"    # Windows_Server-2019-English-Full-2019.03.13
+  AMIId: "ami-074545a6fb2313e2c"    # Windows_Server-2019-English-Full-Base-2019.12.16
 
   # Settings have default values but can be overriden. Set the below
   # parameters *only* if you want to override the defaults.
@@ -39,9 +39,7 @@ parameters:
 
 # For CI system (do not change)
 hooks:
-  before_create:
-    - !cmd "curl https://s3.amazonaws.com/{{stack_group_config.admincentral_cf_bucket}}/aws-infra/master/managed-ec2-win-v4.j2 --create-dirs -o templates/remote/managed-ec2-win-v4.j2"
-  before_update:
-    - !cmd "curl https://s3.amazonaws.com/{{stack_group_config.admincentral_cf_bucket}}/aws-infra/master/managed-ec2-win-v4.j2 --create-dirs -o templates/remote/managed-ec2-win-v4.j2"
+  before_launch:
+    - !cmd "curl https://{{stack_group_config.admincentral_cf_bucket}}.s3.amazonaws.com/aws-infra/master/managed-ec2-win-v4.j2 --create-dirs -o templates/remote/managed-ec2-win-v4.j2"
   after_create:
     - !ec2_notify "{{stack_group_config.aws_account_name}} {{stack_group_config.aws_account_email}}"
