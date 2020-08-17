@@ -14,7 +14,7 @@ repos:
     -   id: cfn-python-lint
         files: templates/.*\.(json|yml|yaml)$
 -   repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.1.6
+    rev: v1.1.9
     hooks:
     -   id: remove-tabs
 -   repo: https://github.com/Sage-Bionetworks-IT/pre-commit-provisioner
