@@ -11,7 +11,7 @@ parameters:
   # The Sage project (Infrastructure, amp-ad, ntap, dream, etc..)
   Project: "HTAN"
   # The resource owner
-  OwnerEmail: "bruno.grande@sagebase.org"
+  OwnerEmail: "xengie.doan@sagebase.org"
 
   # Default account settings, leave alone unless you plan to override
   VpcName: "sandcastlevpc"

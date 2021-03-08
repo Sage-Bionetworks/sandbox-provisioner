@@ -8,7 +8,7 @@ parameters:
   # The Sage project (Infrastructure, amp-ad, ntap, dream, etc..)
   Project: "HTAN"
   # The resource owner
-  OwnerEmail: "bruno.grande@sagebase.org"
+  OwnerEmail: "xengie.doan@sagebase.org"
   # (Optional) true for read-write bucket, false (default) for read-only bucket
   AllowWriteBucket: 'true'
 
@@ -20,7 +20,7 @@ parameters:
   # (Optional) Allow accounts, groups, and users to access bucket. (default is no access).
   GrantAccess:
     - 'arn:aws:iam::325565585839:root'   # Required ARN for a synapse bucket
-    - 'arn:aws:sts::563295687221:assumed-role/sandbox-developer/bruno.grande@sagebase.org'
+    - 'arn:aws:sts::563295687221:assumed-role/sandbox-developer/xengie.doan@sagebase.org'
     - 'arn:aws:iam::289701539771:user/dagutman'
   # (Optional) true (default) to encrypt bucket, false for no encryption
   # EncryptBucket: 'false'
