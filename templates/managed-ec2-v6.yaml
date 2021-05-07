@@ -547,7 +547,7 @@ Resources:
     Condition: EnableEc2Backup
     Properties:
       # template uploaded from Sage-Bionetworks/aws-infra repo
-      TemplateURL: 'https://bootstrap-awss3cloudformationbucket-19qromfd235z9.s3.amazonaws.com/aws-infra/master/ec2-backup.yaml'
+      TemplateURL: 'https://bootstrap-awss3cloudformationbucket-19qromfd235z9.s3.amazonaws.com/aws-infra/v0.2.7/ec2-backup.yaml'
       Parameters:
         StackName: !Ref AWS::StackName
         SnapshotCount: !Ref SnapshotCount
