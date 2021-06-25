@@ -15,7 +15,7 @@ parameters:
 
   # Default account settings, leave alone unless you plan to override
   VpcName: "sandcastlevpc"
-  KeyName: "EmoryHealthcare-dgutman"
+  # KeyName: "EmoryHealthcare-dgutman"
   # AMIId: "ami-0810a318c4b1243c5"      # https://github.com/Sage-Bionetworks-IT/packer-base-amazonlinux2/releases/tag/v1.0.2
   AMIId: "ami-0447d7789ebc37ae3"    # https://github.com/Sage-Bionetworks-IT/packer-base-ubuntu-bionic/releases/tag/v1.0.7
 
