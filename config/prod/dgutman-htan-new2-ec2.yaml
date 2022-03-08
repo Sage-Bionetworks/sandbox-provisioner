@@ -3,6 +3,12 @@ template:
   type: "http"
   url: "https://{{stack_group_config.admincentral_cf_bucket}}.s3.amazonaws.com/aws-infra/v0.2.7/managed-ec2-linux-v2.j2"
 stack_name: "dgutman-htan-new2-ec2"
+stack_tags:
+  Department: "CompOnc"
+  Project: "HTAN"
+  OwnerEmail: "bruno.grande@sagebase.org"
+  CostCenter: "HTAN-DFCI / 120100"
+
 sceptre_user_data:
   Distro: "ubuntu"     # (valid values: aws, ubuntu) AMIId must match distro
   # (Optional) Expose ports to incoming traffic (default is no open ports) (valid range: 1-65535)
