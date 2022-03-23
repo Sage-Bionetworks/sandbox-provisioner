@@ -13,7 +13,7 @@ sceptre_user_data:
   # (Optional) Expose ports to incoming traffic (default is no open ports) (valid range: 1-65535)
   # OpenPorts: ["80","443"]
 parameters:
-
+  JcUserId: "bruno.grande@sagebase.org"
   # Default account settings, leave alone unless you plan to override
   VpcName: "sandcastlevpc"
   KeyName: "sandbox"
