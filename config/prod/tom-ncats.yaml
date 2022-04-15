@@ -1,7 +1,7 @@
 # Provision an EC2 instance
 template:
   type: "http"
-  url: "https://{{stack_group_config.admincentral_cf_bucket}}.s3.amazonaws.com/aws-infra/v0.2.7/managed-ec2-linux-v1.j2"
+  url: "https://{{stack_group_config.admincentral_cf_bucket}}.s3.amazonaws.com/aws-infra/v0.4.0/EC2/jc-ec2-linux.j2"
 stack_name: "tom-ncats"
 stack_tags:
   Department: "CompOnc"
@@ -13,13 +13,7 @@ sceptre_user_data:
   # (Optional) Expose ports to incoming traffic (default is no open ports) (valid range: 1-65535)
   OpenPorts: ["22"]
 parameters:
-  # The Sage deparment (Platform, CompOnc, SysBio, Governance, etc..)
-  Department: "CompOnc"
-  # The Sage project (Infrastructure, amp-ad, ntap, dream, etc..)
-  Project: "dream"
-  # The resource owner
-  OwnerEmail: "thomas.yu@sagebase.org"
-
+  JcUserId: "thomas.yu@sagebase.org"
   # Default account settings, leave alone unless you plan to override
   VpcName: "sandcastlevpc"
   KeyName: "sandbox"
