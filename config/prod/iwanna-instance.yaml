@@ -1,7 +1,7 @@
 # Provision an EC2 instance
 template:
   type: "http"
-  url: "https://raw.githubusercontent.com/Sage-Bionetworks/aws-infra/master/templates/EC2/jc-ec2-linux.j2"
+  url: "https://raw.githubusercontent.com/Sage-Bionetworks/aws-infra/v0.4.0/templates/EC2/jc-ec2-linux.j2"
 stack_name: "iwanna-instance"
 stack_tags:
   Department: "Platform"
