@@ -72,7 +72,6 @@ Parameters:
       - c5.9xlarge
       - c5.18xlarge
       - g2.2xlarge
-      - g2.8xlarge
       - r3.large
       - r3.xlarge
       - r3.2xlarge
