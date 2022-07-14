@@ -18,7 +18,7 @@ parameters:
 
   # Default account settings, leave alone unless you plan to override
   VpcName: "sandcastlevpc"
-  KeyName: "sandbox"
+  KeyName: "jharker-ed25519"
   AMIId: "ami-0cff7528ff583bf9a"      # AWS linux 2 AMI 2.0.20200108 x86_64 HVM gp2
 
   # Settings have default values but can be overriden. Set the below
